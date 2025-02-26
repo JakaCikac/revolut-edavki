@@ -1,0 +1,8 @@
+flask==3.1.0
+pandas==2.2.3
+openpyxl==3.1.5
+requests==2.32.3
+pytest==8.0.2
+pytest-cov==4.1.0
+python-dotenv==1.0.1  # For environment variables
+cryptography==42.0.2  # For additional security features

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Report Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2E7D32;
+            --primary-light: #4CAF50;
+            --primary-dark: #1B5E20;
+            --accent-color: #81C784;
+            --background-light: #E8F5E9;
+            --text-dark: #1B5E20;
+        }
+
+        body {
+            background-color: var(--background-light);
+            color: var(--text-dark);
+        }
+
+        .preview-section {
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(232, 245, 233, 0.9);
+            z-index: 1000;
+        }
+
+        .loading-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: var(--primary-color);
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: white;
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .card-header h5 {
+            color: white;
+            margin: 0;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-dark);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .btn-outline-primary {
+            color: white;
+            border-color: white;
+            background-color: transparent;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: white;
+            border-color: white;
+            color: var(--primary-color);
+        }
+
+        .table {
+            color: var(--text-dark);
+        }
+
+        .table thead th {
+            background-color: var(--primary-light);
+            color: white;
+            border-bottom: 2px solid var(--primary-dark);
+            padding: 1rem;
+            font-weight: 600;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+        }
+
+        h1, h2, h5 {
+            color: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="mb-4">Tax Report Generator</h1>
+        
+        <!-- File Upload Form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Upload Files</h5>
+                <form id="uploadForm" class="mb-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="year" class="form-label">Report Year</label>
+                                <input type="number" class="form-control" id="year" name="year" value="2024" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="tax_number" class="form-label">Tax Number</label>
+                                <input type="text" class="form-control" id="tax_number" name="tax_number" required 
+                                       pattern="[0-9]{8}" title="8-digit tax number">
+                            </div>
+                            <div class="mb-3">
+                                <label for="taxpayer_type" class="form-label">Taxpayer Type</label>
+                                <select class="form-control" id="taxpayer_type" name="taxpayer_type">
+                                    <option value="FO">Individual (FO)</option>
+                                    <option value="PO">Legal Entity (PO)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="transactions" class="form-label">Transactions CSV</label>
+                                <input type="file" class="form-control" id="transactions" name="transactions" accept=".csv" required>
+                                <small class="text-muted">File will be securely stored with hashed name</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="company_info" class="form-label">Company Info Excel</label>
+                                <input type="file" class="form-control" id="company_info" name="company_info" accept=".xlsx" required>
+                                <small class="text-muted">File will be securely stored with hashed name</small>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload"></i> Upload and Process
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Preview Sections -->
+        <div id="previewContainer" class="preview-section">
+            <h2 class="mb-3">Preview</h2>
+            
+            <!-- KDVP Preview -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Stock Transactions (KDVP)</h5>
+                    <div>
+                        <a href="/download/debug_kdvp.csv" class="btn btn-sm btn-outline-secondary me-2">
+                            <i class="bi bi-file-text"></i> Debug CSV
+                        </a>
+                        <a href="/download/Doh-KDVP.xml" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-download"></i> Download XML
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table" id="kdvpTable">
+                            <thead>
+                                <tr>
+                                    <th>Ticker</th>
+                                    <th>Buy Transactions</th>
+                                    <th>Sell Transactions</th>
+                                    <th>Last Buy</th>
+                                    <th>Last Sell</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dividends Preview -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Dividends</h5>
+                    <div>
+                        <a href="/download/debug_dividends.csv" class="btn btn-sm btn-outline-secondary me-2">
+                            <i class="bi bi-file-text"></i> Debug CSV
+                        </a>
+                        <a href="/download/Doh-Div.xml" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-download"></i> Download XML
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table" id="dividendsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Ticker</th>
+                                    <th>Company</th>
+                                    <th>Amount</th>
+                                    <th>FX Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IFI Preview -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Index Funds (IFI)</h5>
+                    <div>
+                        <a href="/download/debug_ifi.csv" class="btn btn-sm btn-outline-secondary me-2">
+                            <i class="bi bi-file-text"></i> Debug CSV
+                        </a>
+                        <a href="/download/D-IFI.xml" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-download"></i> Download XML
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table" id="ifiTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Shares</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Examples Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">XML Format Examples</h5>
+            </div>
+            <div class="card-body">
+                <h6>KDVP (Stock Transaction)</h6>
+                <pre class="bg-light p-3 mb-4"><code>&lt;KDVPItem&gt;
+    &lt;InventoryListType&gt;PLVP&lt;/InventoryListType&gt;
+    &lt;Name&gt;AAPL&lt;/Name&gt;
+    &lt;Securities&gt;
+        &lt;Code&gt;AAPL&lt;/Code&gt;
+        &lt;Name&gt;AAPL&lt;/Name&gt;
+        &lt;Row&gt;
+            &lt;Purchase&gt;
+                &lt;F1&gt;2024-02-17&lt;/F1&gt;
+                &lt;F2&gt;B&lt;/F2&gt;
+                &lt;F3&gt;50.00000000&lt;/F3&gt;
+                &lt;F4&gt;167.36111111&lt;/F4&gt;
+            &lt;/Purchase&gt;
+        &lt;/Row&gt;
+    &lt;/Securities&gt;
+&lt;/KDVPItem&gt;</code></pre>
+
+                <h6>Dividend</h6>
+                <pre class="bg-light p-3 mb-4"><code>&lt;Dividend&gt;
+    &lt;Date&gt;2024-01-03&lt;/Date&gt;
+    &lt;PayerName&gt;Garmin Ltd&lt;/PayerName&gt;
+    &lt;PayerAddress&gt;Mühlentalstrasse 2, Schaffhausen&lt;/PayerAddress&gt;
+    &lt;PayerCountry&gt;USA&lt;/PayerCountry&gt;
+    &lt;Type&gt;1&lt;/Type&gt;
+    &lt;Value&gt;1.36&lt;/Value&gt;
+&lt;/Dividend&gt;</code></pre>
+
+                <h6>Currency Conversion</h6>
+                <pre class="bg-light p-3 mb-4"><code># Example: Converting 1.46 USD to EUR with FX rate 1.0700
+Original amount: 1.46 USD
+FX rate: 1.0700 EUR/USD
+EUR amount = 1.46 / 1.0700 = 1.36 EUR</code></pre>
+
+                <h6>Flow Chart</h6>
+                <div class="mermaid">
+                    graph TD
+                    A[Upload Files] --> B[Parse CSV/Excel]
+                    B --> C[Filter by Year]
+                    C --> D{Transaction Type}
+                    D -->|Stock| E[Process KDVP]
+                    D -->|Dividend| F[Process Dividends]
+                    D -->|Index Fund| G[Process IFI]
+                    E --> H[Convert Currency]
+                    F --> H
+                    G --> H
+                    H --> I[Generate XML]
+                    H --> J[Create Debug CSV]
+                    I --> K[Download Files]
+                    J --> K
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading" id="loadingOverlay">
+            <div class="loading-content">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Processing...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            document.getElementById('loadingOverlay').style.display = 'block';
+            document.getElementById('previewContainer').style.display = 'none';
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Update KDVP table
+                    const kdvpBody = document.querySelector('#kdvpTable tbody');
+                    kdvpBody.innerHTML = data.kdvp.map(item => `
+                        <tr>
+                            <td>${item.ticker}</td>
+                            <td>${item.buys}</td>
+                            <td>${item.sells}</td>
+                            <td>${item.last_buy}</td>
+                            <td>${item.last_sell}</td>
+                        </tr>
+                    `).join('');
+
+                    // Update Dividends table
+                    const dividendsBody = document.querySelector('#dividendsTable tbody');
+                    dividendsBody.innerHTML = data.dividends.map(item => `
+                        <tr>
+                            <td>${item.date}</td>
+                            <td>${item.ticker}</td>
+                            <td>${item.company}</td>
+                            <td>${item.amount.toFixed(2)}</td>
+                            <td>${item.fx_rate}</td>
+                        </tr>
+                    `).join('');
+
+                    // Update IFI table
+                    const ifiBody = document.querySelector('#ifiTable tbody');
+                    ifiBody.innerHTML = data.ifi.map(item => `
+                        <tr>
+                            <td>${item.date}</td>
+                            <td>${item.type}</td>
+                            <td>${item.amount.toFixed(2)}</td>
+                            <td>${item.shares}</td>
+                        </tr>
+                    `).join('');
+
+                    document.getElementById('previewContainer').style.display = 'block';
+                } else {
+                    alert(data.error || 'Error processing files');
+                }
+            } catch (error) {
+                alert('Error processing files');
+                console.error(error);
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

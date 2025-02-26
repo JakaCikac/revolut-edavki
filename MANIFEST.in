@@ -1,0 +1,5 @@
+include README.md
+include LICENSE
+include requirements.txt
+include .env.example
+recursive-include revolut_edavki/revolut_edavki/templates *

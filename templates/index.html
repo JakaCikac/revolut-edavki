@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tax Report Generator</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="file"], input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .preview {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .error {
+            color: red;
+            margin: 10px 0;
+        }
+        .success {
+            color: green;
+            margin: 10px 0;
+        }
+        .download-links {
+            margin-top: 20px;
+        }
+        .download-links a {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 3px;
+        }
+        .download-links a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tax Report Generator</h1>
+    
+    <div class="form-group">
+        <label for="year">Tax Year:</label>
+        <input type="number" id="year" name="year" value="2024">
+    </div>
+
+    <div class="form-group">
+        <label for="tax_number">Tax Number:</label>
+        <input type="text" id="tax_number" name="tax_number" required>
+    </div>
+
+    <div class="form-group">
+        <label for="transactions">Transactions CSV:</label>
+        <input type="file" id="transactions" name="transactions" accept=".csv" required>
+    </div>
+
+    <div class="form-group">
+        <label for="company_info">Company Info Excel:</label>
+        <input type="file" id="company_info" name="company_info" accept=".xlsx" required>
+    </div>
+
+    <button onclick="uploadFiles()">Generate Reports</button>
+
+    <div id="error" class="error"></div>
+    <div id="success" class="success"></div>
+
+    <div id="preview" class="preview"></div>
+
+    <div id="downloads" class="download-links" style="display: none;">
+        <h3>Download Reports:</h3>
+        <a href="/download/Doh-KDVP.xml" download>KDVP Report</a>
+        <a href="/download/Doh-Div.xml" download>Dividend Report</a>
+        <a href="/download/D-IFI.xml" download>IFI Report</a>
+        <h3>Download Debug Files:</h3>
+        <a href="/download/debug_kdvp.csv" download>KDVP Debug</a>
+        <a href="/download/debug_dividends.csv" download>Dividends Debug</a>
+        <a href="/download/debug_ifi.csv" download>IFI Debug</a>
+    </div>
+
+    <script>
+        async function uploadFiles() {
+            const formData = new FormData();
+            const transactions = document.getElementById('transactions').files[0];
+            const company_info = document.getElementById('company_info').files[0];
+            const year = document.getElementById('year').value;
+            const tax_number = document.getElementById('tax_number').value;
+
+            if (!transactions || !company_info || !tax_number) {
+                document.getElementById('error').textContent = 'Please fill in all required fields';
+                return;
+            }
+
+            formData.append('transactions', transactions);
+            formData.append('company_info', company_info);
+            formData.append('year', year);
+            formData.append('tax_number', tax_number);
+
+            try {
+                document.getElementById('error').textContent = '';
+                document.getElementById('success').textContent = 'Processing...';
+                
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const preview = await response.json();
+                displayPreview(preview);
+                document.getElementById('success').textContent = 'Reports generated successfully!';
+                document.getElementById('downloads').style.display = 'block';
+            } catch (error) {
+                document.getElementById('error').textContent = `Error: ${error.message}`;
+                document.getElementById('success').textContent = '';
+            }
+        }
+
+        function displayPreview(preview) {
+            let html = '<h2>Preview</h2>';
+            
+            // KDVP Preview
+            if (preview.kdvp.length > 0) {
+                html += '<h3>Stock Transactions (KDVP)</h3><ul>';
+                preview.kdvp.forEach(item => {
+                    html += `<li>${item.ticker}: ${item.buys} buys, ${item.sells} sells in selected year</li>`;
+                });
+                html += '</ul>';
+            }
+
+            // Dividends Preview
+            if (preview.dividends.length > 0) {
+                html += '<h3>Dividends</h3><ul>';
+                preview.dividends.forEach(item => {
+                    html += `<li>${item.date} - ${item.ticker} (${item.company}): ${item.amount} ${item.fx_rate}</li>`;
+                });
+                html += '</ul>';
+            }
+
+            // IFI Preview
+            if (preview.ifi.length > 0) {
+                html += '<h3>Index Fund Transactions (IFI)</h3><ul>';
+                preview.ifi.forEach(item => {
+                    html += `<li>${item.date} - ${item.type}: ${item.amount} EUR (${item.shares} shares)</li>`;
+                });
+                html += '</ul>';
+            }
+
+            document.getElementById('preview').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
