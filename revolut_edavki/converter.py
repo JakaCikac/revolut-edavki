@@ -364,8 +364,12 @@ def create_div_xml(transactions, company_info, year, tax_number, taxpayer_type="
 
     # Create body
     body = ET.SubElement(root, "body")
+    
+    # Add Doh_Div with Period only
     doh_div = ET.SubElement(body, "Doh_Div")
     ET.SubElement(doh_div, "Period").text = str(year)
+    
+    # Close Doh_Div and start adding Dividend elements directly to body
 
     # Filter dividend transactions for the specific year
     dividend_transactions = transactions[
@@ -420,7 +424,7 @@ def create_div_xml(transactions, company_info, year, tax_number, taxpayer_type="
         )
 
         # Create dividend item
-        div_item = ET.SubElement(doh_div, "Dividend")
+        div_item = ET.SubElement(body, "Dividend")
         ET.SubElement(div_item, "Date").text = tx["Date"].strftime("%Y-%m-%d")
         ET.SubElement(div_item, "PayerIdentificationNumber").text = company.get(
             "ISIN", ""
