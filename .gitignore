@@ -57,6 +57,15 @@ bsrate*.xml
 # Poetry
 poetry.lock
 
+# Docker
+.docker/
+docker-compose.override.yml
+test_uploads/
+
+# Test files
+test_*.csv
+test_*.xlsx
+
 # Virtual Environment
 venv/
 env/

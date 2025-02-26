@@ -1,0 +1,20 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install Poetry
+RUN pip install poetry
+
+# Copy project files
+COPY . .
+
+# Install dependencies including dev dependencies
+RUN poetry config virtualenvs.in-project true && \
+    poetry install --no-interaction
+
+# Set environment variables for testing
+ENV PYTHONPATH="/app:$PYTHONPATH"
+ENV TAX_SALT="test_salt_123"
+
+# Run tests by default
+CMD ["poetry", "run", "pytest", "tests/", "-v", "--cov=revolut_edavki", "--cov-report=term-missing"]
