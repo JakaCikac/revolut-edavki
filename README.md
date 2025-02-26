@@ -2,6 +2,18 @@
 
 A web application that generates tax report XML files for the Slovenian Financial Administration (FURS) from trading and dividend data.
 
+[![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
+[![Flask](https://img.shields.io/badge/flask-3.1.0-green.svg)](https://flask.palletsprojects.com/)
+[![Poetry](https://img.shields.io/badge/poetry-1.7.0-blue.svg)](https://python-poetry.org/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+This application helps Slovenian taxpayers generate XML files for their tax reports from trading and dividend data. It supports:
+- Capital Gains (KDVP) reports for stock trading
+- Dividend Income reports
+- Index Fund (IFI) reports
+
+The application provides a user-friendly web interface for uploading transaction data, previewing the reports, and downloading the generated XML files in the format required by FURS.
+
 ## Features
 
 - Generates three types of tax reports:
