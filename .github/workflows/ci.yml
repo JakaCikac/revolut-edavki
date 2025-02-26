@@ -72,13 +72,13 @@ jobs:
     - name: Install dependencies
       run: |
         poetry install --no-interaction
-        poetry add --group dev black flake8 mypy types-requests
+        poetry add --group dev black flake8 mypy types-requests pandas-stubs
         
     - name: Run linters
       run: |
         poetry run black . --check
-        poetry run flake8 .
-        poetry run mypy revolut_edavki
+        poetry run flake8 . --config=setup.cfg
+        poetry run mypy revolut_edavki --config-file mypy.ini
 
   docker:
     runs-on: ubuntu-latest
