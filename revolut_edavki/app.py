@@ -5,10 +5,7 @@ from flask import Flask, render_template, request, send_file, jsonify
 import pandas as pd
 import requests
 from datetime import datetime
-import xml.etree.ElementTree as ET
-from io import BytesIO
-import tempfile
-from werkzeug.utils import secure_filename
+
 from . import converter  # our existing converter module
 from . import utils  # our utilities module
 
@@ -180,7 +177,7 @@ def process_files(
                     }
                 )
                 print(
-                    f"Added IFI transaction: {'Buy' if 'BUY' in tx['Type'] else 'Sell'} - {amount} EUR ({tx['Date'].strftime('%Y-%m-%d')})"
+                    f"Added IFI transaction: {tx['Type']} - {amount} EUR ({tx['Date'].strftime('%Y-%m-%d')})"
                 )
 
         print("\nGenerating XML files...")

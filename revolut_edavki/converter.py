@@ -1,7 +1,7 @@
 """Converter module for revolut-edavki."""
 
 import pandas as pd
-from datetime import datetime
+
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
@@ -364,11 +364,11 @@ def create_div_xml(transactions, company_info, year, tax_number, taxpayer_type="
 
     # Create body
     body = ET.SubElement(root, "body")
-    
+
     # Add Doh_Div with Period only
     doh_div = ET.SubElement(body, "Doh_Div")
     ET.SubElement(doh_div, "Period").text = str(year)
-    
+
     # Close Doh_Div and start adding Dividend elements directly to body
 
     # Filter dividend transactions for the specific year

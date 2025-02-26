@@ -96,7 +96,7 @@ def test_upload_files(client: FlaskClient):
         assert response.status_code == 200
         root = ET.fromstring(response.data)
         # Remove namespace from tag for comparison
-        tag_without_namespace = root.tag.split('}')[-1] if '}' in root.tag else root.tag
+        tag_without_namespace = root.tag.split("}")[-1] if "}" in root.tag else root.tag
         assert tag_without_namespace == "Envelope"
 
     finally:

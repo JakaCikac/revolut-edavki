@@ -3,7 +3,7 @@
 import hashlib
 import os
 from pathlib import Path
-from typing import Optional
+
 
 
 def hash_taxpayer_id(tax_id: str) -> str:

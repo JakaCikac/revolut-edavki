@@ -6,14 +6,7 @@ from flask_cors import CORS
 import pandas as pd
 import requests
 from datetime import datetime
-import xml.etree.ElementTree as ET
-from werkzeug.utils import secure_filename
-from revolut_edavki.converter import (
-    clean_amount,
-    create_kdvp_xml,
-    create_div_xml,
-    create_ifi_xml,
-)
+from revolut_edavki.converter import create_kdvp_xml, create_div_xml, create_ifi_xml
 
 app = Flask(__name__, template_folder="revolut_edavki/templates")
 CORS(
@@ -178,7 +171,7 @@ def process_files(
                     }
                 )
                 print(
-                    f"Added IFI transaction: {'Buy' if 'BUY' in tx['Type'] else 'Sell'} - {amount} EUR ({tx['Date'].strftime('%Y-%m-%d')})"
+                    f"Added IFI transaction: {tx['Type']} - {amount} EUR ({tx['Date'].strftime('%Y-%m-%d')})"
                 )
 
         print("\nGenerating XML files...")
