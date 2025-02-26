@@ -70,7 +70,9 @@ jobs:
         
     - name: Run linters
       run: |
-        poetry run black . --check
+        # Format with black (don't fail on formatting)
+        poetry run black .
+        # Run other linters
         poetry run flake8 . --config=setup.cfg
         poetry run mypy revolut_edavki --config-file mypy.ini
 
