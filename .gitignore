@@ -20,6 +20,43 @@ wheels/
 .installed.cfg
 *.egg
 
+# Virtual environments
+venv/
+env/
+ENV/
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Generated files
+*.xml
+debug_*.csv
+server.log
+uploads/*
+!uploads/.gitkeep
+
+# Sample data
+transactions.csv
+Company_info.xlsx
+bsrate*.xml
+
+# Poetry
+poetry.lock
+
 # Virtual Environment
 venv/
 env/
