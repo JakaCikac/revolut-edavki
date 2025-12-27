@@ -22,6 +22,7 @@ wheels/
 
 # Virtual environments
 venv/
+.venv/
 env/
 ENV/
 .env
@@ -45,6 +46,7 @@ coverage.xml
 # Generated files
 *.xml
 debug_*.csv
+*.log
 server.log
 uploads/*
 !uploads/.gitkeep
@@ -57,29 +59,10 @@ bsrate*.xml
 # Poetry
 poetry.lock
 
-# Virtual Environment
-venv/
-env/
-ENV/
-.env
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Application specific
-uploads/
-*.log
-server.log
-debug_*.csv
-*.xml
-htmlcov/
-.coverage
-.pytest_cache/
-
 # Security
 *.pem
 *.key
 *.cert
+
+# Docker
+.dockerignore

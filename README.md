@@ -42,7 +42,49 @@ The application provides a user-friendly web interface for uploading transaction
 - Python 3.x
 - pip (Python package installer)
 
+OR
+
+- Docker and Docker Compose (for containerized deployment)
+
 ## Installation
+
+### Installation with Docker Compose (easiest)
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/openhands/revolut-edavki.git
+   cd revolut-edavki
+   ```
+
+2. Create your environment file:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your settings:
+   # TAX_SALT=your_random_salt_here
+   # UPLOAD_PATH=/path/to/secure/storage
+   ```
+
+3. Build and start the application:
+   ```bash
+   docker-compose up -d
+   ```
+
+4. Access the application at:
+   ```
+   http://localhost:59855
+   ```
+
+5. View logs:
+   ```bash
+   docker-compose logs -f
+   ```
+
+6. Stop the application:
+   ```bash
+   docker-compose down
+   ```
+
+**Note:** The `uploads` directory is mounted as a volume, so your data persists between container restarts.
 
 ### Installation with Poetry (recommended)
 
