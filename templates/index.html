@@ -1,72 +1,267 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Tax Report Generator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Report Generator - Slovenian FURS</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 20px; 
-            max-width: 800px;
-            margin: 0 auto;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
         }
-        .form-group {
-            margin-bottom: 15px;
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
         }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .form-section {
+            background: #f8fafb;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px solid #e1e8ed;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.95em;
         }
+
         input[type="file"], input[type="number"], input[type="text"] {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: white;
         }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
+
+        input[type="file"]:focus, input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        input[type="file"] {
+            padding: 10px;
             cursor: pointer;
         }
+
+        button {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
         button:hover {
-            background-color: #45a049;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
         }
+
+        button:active {
+            transform: translateY(0);
+        }
+
         .preview {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+            border-radius: 12px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .preview h2 {
+            color: #1e40af;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .preview h3 {
+            color: #2563eb;
             margin-top: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
         }
-        .error {
-            color: red;
-            margin: 10px 0;
-        }
-        .success {
-            color: green;
-            margin: 10px 0;
-        }
-        .download-links {
-            margin-top: 20px;
-        }
-        .download-links a {
-            display: inline-block;
+
+        .preview h3::before {
+            content: "📊";
             margin-right: 10px;
-            padding: 5px 10px;
-            background-color: #007bff;
+        }
+
+        .preview ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .preview li {
+            background: white;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 3px solid #10b981;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #dc2626;
+            font-weight: 500;
+        }
+
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #10b981;
+            font-weight: 500;
+        }
+
+        .download-section {
+            margin-top: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-radius: 12px;
+            border: 2px solid #10b981;
+        }
+
+        .download-section h3 {
+            color: #065f46;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .download-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .download-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
             text-decoration: none;
-            border-radius: 3px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
         }
+
         .download-links a:hover {
-            background-color: #0056b3;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .download-links a::before {
+            content: "⬇️";
+            margin-right: 8px;
+        }
+
+        .info-badge {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+
+            .download-links {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Tax Report Generator</h1>
-    
+    <div class="container">
+        <div class="header">
+            <h1>🇸🇮 Tax Report Generator</h1>
+            <p>Generate XML reports for Slovenian Financial Administration (FURS)</p>
+        </div>
+
+        <div class="content">
+            <div class="form-section">
+
     <div class="form-group">
         <label for="year">Tax Year:</label>
         <input type="number" id="year" name="year" value="2024">
@@ -87,22 +282,29 @@
         <input type="file" id="company_info" name="company_info" accept=".xlsx" required>
     </div>
 
-    <button onclick="uploadFiles()">Generate Reports</button>
+    <button onclick="uploadFiles()">🚀 Generate Reports</button>
+            </div>
 
-    <div id="error" class="error"></div>
-    <div id="success" class="success"></div>
+    <div id="error" class="error" style="display: none;"></div>
+    <div id="success" class="success" style="display: none;"></div>
 
-    <div id="preview" class="preview"></div>
+    <div id="preview" class="preview" style="display: none;"></div>
 
-    <div id="downloads" class="download-links" style="display: none;">
-        <h3>Download Reports:</h3>
-        <a href="/download/Doh-KDVP.xml" download>KDVP Report</a>
-        <a href="/download/Doh-Div.xml" download>Dividend Report</a>
-        <a href="/download/D-IFI.xml" download>IFI Report</a>
-        <h3>Download Debug Files:</h3>
-        <a href="/download/debug_kdvp.csv" download>KDVP Debug</a>
-        <a href="/download/debug_dividends.csv" download>Dividends Debug</a>
-        <a href="/download/debug_ifi.csv" download>IFI Debug</a>
+    <div id="downloads" class="download-section" style="display: none;">
+        <h3>📄 Tax Reports</h3>
+        <div class="download-links">
+            <a href="/download/Doh-KDVP.xml" download>KDVP Report</a>
+            <a href="/download/Doh-Div.xml" download>Dividend Report</a>
+            <a href="/download/D-IFI.xml" download>IFI Report</a>
+        </div>
+        <h3>🔍 Debug Files</h3>
+        <div class="download-links">
+            <a href="/download/debug_kdvp.csv" download>KDVP Debug</a>
+            <a href="/download/debug_dividends.csv" download>Dividends Debug</a>
+            <a href="/download/debug_ifi.csv" download>IFI Debug</a>
+        </div>
+    </div>
+        </div>
     </div>
 
     <script>
@@ -114,7 +316,9 @@
             const tax_number = document.getElementById('tax_number').value;
 
             if (!transactions || !company_info || !tax_number) {
-                document.getElementById('error').textContent = 'Please fill in all required fields';
+                const errorDiv = document.getElementById('error');
+                errorDiv.textContent = '⚠️ Please fill in all required fields';
+                errorDiv.style.display = 'block';
                 return;
             }
 
@@ -124,9 +328,11 @@
             formData.append('tax_number', tax_number);
 
             try {
-                document.getElementById('error').textContent = '';
-                document.getElementById('success').textContent = 'Processing...';
-                
+                document.getElementById('error').style.display = 'none';
+                const successDiv = document.getElementById('success');
+                successDiv.textContent = '⏳ Processing your files...';
+                successDiv.style.display = 'block';
+
                 const response = await fetch('/upload', {
                     method: 'POST',
                     body: formData
@@ -138,17 +344,20 @@
 
                 const preview = await response.json();
                 displayPreview(preview);
-                document.getElementById('success').textContent = 'Reports generated successfully!';
+                successDiv.textContent = '✅ Reports generated successfully!';
                 document.getElementById('downloads').style.display = 'block';
             } catch (error) {
-                document.getElementById('error').textContent = `Error: ${error.message}`;
-                document.getElementById('success').textContent = '';
+                const errorDiv = document.getElementById('error');
+                errorDiv.textContent = `❌ Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+                document.getElementById('success').style.display = 'none';
             }
         }
 
         function displayPreview(preview) {
-            let html = '<h2>Preview</h2>';
-            
+            const previewDiv = document.getElementById('preview');
+            let html = '<h2>📋 Report Preview</h2>';
+
             // KDVP Preview
             if (preview.kdvp.length > 0) {
                 html += '<h3>Stock Transactions (KDVP)</h3><ul>';
@@ -176,7 +385,8 @@
                 html += '</ul>';
             }
 
-            document.getElementById('preview').innerHTML = html;
+            previewDiv.innerHTML = html;
+            previewDiv.style.display = 'block';
         }
     </script>
 </body>
