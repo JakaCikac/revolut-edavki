@@ -21,6 +21,9 @@ RUN poetry config virtualenvs.create false
 # Install dependencies (without installing the project itself yet)
 RUN poetry install --only main --no-root --no-interaction --no-ansi
 
+# Install additional security dependencies if not already included
+RUN pip install --no-cache-dir defusedxml flask-limiter
+
 # Copy application code
 COPY . .
 

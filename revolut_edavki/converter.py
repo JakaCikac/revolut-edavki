@@ -2,7 +2,13 @@
 
 import pandas as pd
 from datetime import datetime
-import xml.etree.ElementTree as ET
+try:
+    import defusedxml.ElementTree as ET
+except ImportError:
+    # Fallback to standard library if defusedxml not available
+    import xml.etree.ElementTree as ET
+    import warnings
+    warnings.warn("defusedxml not available, using standard xml library. Install defusedxml for XXE protection.")
 from xml.dom import minidom
 
 def get_exchange_rate(date, currency):

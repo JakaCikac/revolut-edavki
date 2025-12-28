@@ -1,7 +1,8 @@
 services:
+  # Development service (Flask dev server)
   web:
     build: .
-    container_name: revolut-edavki
+    container_name: revolut-edavki-dev
     ports:
       - "59855:59855"
     volumes:
@@ -11,12 +12,44 @@ services:
       - ./.env:/app/.env:ro
     environment:
       - PYTHONUNBUFFERED=1
+      - DEBUG=true
     env_file:
       - .env
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:59855')"]
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:59855/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    profiles:
+      - dev
+
+  # Production service (Gunicorn)
+  web-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: revolut-edavki-prod
+    ports:
+      - "59855:59855"
+    volumes:
+      # Mount uploads directory for persistent storage
+      - ./uploads:/app/uploads
+      # Mount .env file for configuration
+      - ./.env:/app/.env:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - DEBUG=false
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:59855/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    profiles:
+      - production

@@ -1,26 +1,84 @@
 """Simple Flask server for tax report generation."""
 
 import os
+import logging
+from pathlib import Path
 from flask import Flask, render_template, request, send_file, jsonify
 from flask_cors import CORS
 import pandas as pd
 import requests
 from datetime import datetime
-import xml.etree.ElementTree as ET
+from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 from revolut_edavki.converter import clean_amount, create_kdvp_xml, create_div_xml, create_ifi_xml
 
-app = Flask(__name__, template_folder='revolut_edavki/templates')
-CORS(app, resources={r"/*": {"origins": "*", "allow_headers": "*", "expose_headers": "*"}})
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-app.config['DEBUG'] = True
+# Load environment variables
+load_dotenv()
 
-# Ensure upload directory exists
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+# Configure logging
+logging.basicConfig(
+    level=os.getenv('LOG_LEVEL', 'INFO'),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+app = Flask(__name__, template_folder='revolut_edavki/templates')
+
+# Rate limiting configuration (optional, requires Flask-Limiter)
+try:
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
+    
+    limiter = Limiter(
+        app=app,
+        key_func=get_remote_address,
+        default_limits=[os.getenv('RATE_LIMIT', '100 per hour')],
+        storage_uri=os.getenv('RATE_LIMIT_STORAGE', 'memory://'),
+    )
+    logger.info('Rate limiting enabled')
+except ImportError:
+    limiter = None
+    logger.warning('Flask-Limiter not installed. Rate limiting disabled. Install flask-limiter for production.')
+
+# Environment-based CORS configuration
+allowed_origins = os.getenv('CORS_ORIGINS', '*')
+if allowed_origins == '*':
+    logger.warning('CORS is configured to allow all origins. Set CORS_ORIGINS for production.')
+    CORS(app, resources={r"/*": {"origins": "*", "allow_headers": "*", "expose_headers": "*"}})
+else:
+    origins_list = [origin.strip() for origin in allowed_origins.split(',')]
+    CORS(app, resources={r"/*": {"origins": origins_list}})
+    logger.info(f'CORS configured for origins: {origins_list}')
+
+# Configuration from environment
+app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_PATH', 'uploads')
+app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_FILE_SIZE', 16 * 1024 * 1024))  # Default 16MB
+app.config['DEBUG'] = os.getenv('DEBUG', 'false').lower() == 'true'
+
+if app.config['DEBUG']:
+    logger.warning('DEBUG mode is enabled. Disable for production!')
+
+# Ensure upload directory exists with secure permissions
+try:
+    upload_path = Path(app.config['UPLOAD_FOLDER'])
+    upload_path.mkdir(parents=True, exist_ok=True)
+    logger.info(f'Upload directory configured: {upload_path.absolute()}')
+except Exception as e:
+    logger.error(f'Failed to create upload directory: {e}')
+    raise
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'csv', 'xlsx', 'xml'}
+    """Validate file extension and check for path traversal."""
+    if not filename or '..' in filename or '/' in filename or '\\' in filename:
+        logger.warning(f'Rejected suspicious filename: {filename}')
+        return False
+    
+    allowed_extensions = {'csv', 'xlsx', 'xml'}
+    has_extension = '.' in filename
+    if has_extension:
+        extension = filename.rsplit('.', 1)[1].lower()
+        return extension in allowed_extensions
+    return False
 
 def get_bsrate():
     url = 'https://www.bsi.si/_data/tecajnice/dtecbs-l.xml'
@@ -148,34 +206,92 @@ def process_files(transactions_file, company_info_file, year, tax_number, taxpay
 
 @app.route('/')
 def index():
+    """Render the main application page."""
     return render_template('index.html')
 
+@app.route('/health')
+def health():
+    """Health check endpoint for monitoring."""
+    return jsonify({
+        'status': 'healthy',
+        'service': 'revolut-edavki',
+        'version': '1.0.0'
+    }), 200
+
 @app.route('/upload', methods=['POST'])
+@limiter.limit('10 per hour') if limiter else lambda f: f
 def upload():
-    if 'transactions' not in request.files or 'company_info' not in request.files:
-        return jsonify({'error': 'Missing required files'}), 400
+    """Handle file upload and processing."""
+    try:
+        # Validate required files
+        if 'transactions' not in request.files or 'company_info' not in request.files:
+            logger.warning('Upload attempt with missing files')
+            return jsonify({'error': 'Missing required files'}), 400
+        
+        transactions_file = request.files['transactions']
+        company_info_file = request.files['company_info']
+        
+        # Validate filenames
+        if not transactions_file.filename or not company_info_file.filename:
+            logger.warning('Upload attempt with empty filenames')
+            return jsonify({'error': 'Invalid file names'}), 400
+        
+        # Validate file types
+        if not all(allowed_file(f.filename) for f in [transactions_file, company_info_file]):
+            logger.warning(f'Invalid file types: {transactions_file.filename}, {company_info_file.filename}')
+            return jsonify({'error': 'Invalid file type. Only CSV, XLSX, and XML files are allowed.'}), 400
+        
+        # Validate and parse parameters
+        try:
+            year = int(request.form.get('year', datetime.now().year))
+            if year < 2000 or year > datetime.now().year + 1:
+                return jsonify({'error': 'Invalid year'}), 400
+        except ValueError:
+            return jsonify({'error': 'Invalid year format'}), 400
+        
+        tax_number = request.form.get('tax_number', '')
+        taxpayer_type = request.form.get('taxpayer_type', 'FO')
+        
+        if taxpayer_type not in ['FO', 'SP', 'PO']:
+            return jsonify({'error': 'Invalid taxpayer type'}), 400
+        
+        logger.info(f'Processing upload for year {year}, taxpayer type {taxpayer_type}')
+        
+        preview = process_files(transactions_file, company_info_file, year, tax_number, taxpayer_type)
+        return jsonify(preview)
     
-    transactions_file = request.files['transactions']
-    company_info_file = request.files['company_info']
-    year = int(request.form.get('year', datetime.now().year))
-    tax_number = request.form.get('tax_number')
-    taxpayer_type = request.form.get('taxpayer_type', 'FO')
-    
-    if not all(allowed_file(f.filename) for f in [transactions_file, company_info_file]):
-        return jsonify({'error': 'Invalid file type'}), 400
-    
-    preview = process_files(transactions_file, company_info_file, year, tax_number, taxpayer_type)
-    return jsonify(preview)
+    except ValueError as e:
+        logger.error(f'Validation error: {e}')
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        logger.error(f'Upload processing error: {e}', exc_info=True)
+        return jsonify({'error': 'An error occurred processing your files. Please check the format and try again.'}), 500
 
 @app.route('/download/<filename>')
 def download(filename):
+    """Download generated report files."""
+    # Whitelist of allowed files
     allowed_files = [
         'Doh-KDVP.xml', 'Doh-Div.xml', 'D-IFI.xml',
         'debug_dividends.csv', 'debug_kdvp.csv', 'debug_ifi.csv'
     ]
+    
+    # Strict filename validation
     if filename not in allowed_files:
-        return 'File not found', 404
-    return send_file(filename, as_attachment=True)
+        logger.warning(f'Attempt to download unauthorized file: {filename}')
+        return jsonify({'error': 'File not found'}), 404
+    
+    # Check if file exists
+    if not os.path.exists(filename):
+        logger.warning(f'Requested file does not exist: {filename}')
+        return jsonify({'error': 'File not found'}), 404
+    
+    try:
+        logger.info(f'Downloading file: {filename}')
+        return send_file(filename, as_attachment=True)
+    except Exception as e:
+        logger.error(f'Error downloading file {filename}: {e}')
+        return jsonify({'error': 'Error downloading file'}), 500
 
 if __name__ == '__main__':
     import argparse
