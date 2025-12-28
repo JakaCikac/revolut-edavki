@@ -29,7 +29,7 @@ def allowed_file(filename):
 
 def get_bsrate():
     url = "https://www.bsi.si/_data/tecajnice/dtecbs-l.xml"
-    response = requests.get(url)
+    response = requests.get(url, timeout=30)
     if response.status_code == 200:
         # Save the file
         with open(os.path.join(app.config["UPLOAD_FOLDER"], "bsrate.xml"), "wb") as f:
@@ -82,7 +82,7 @@ def process_files(transactions_file, company_info_file, year, tax_number, taxpay
         print(f"Filtered transactions for {year}: {len(transactions_year)} rows")
 
         # Generate preview data
-        preview = {"kdvp": [], "dividends": [], "ifi": []}
+        preview: dict[str, list] = {"kdvp": [], "dividends": [], "ifi": []}
 
         # KDVP preview - only stocks with sells in target year
         stock_tx = transactions_year[
@@ -205,4 +205,4 @@ def download(filename):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=59855)
+    app.run(host="0.0.0.0", port=59855)  # nosec B104 - Development server only

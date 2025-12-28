@@ -36,7 +36,7 @@ def get_exchange_rate(date, currency):
         if DEFUSEDXML_AVAILABLE:
             tree = DefusedET.parse("bsrate.xml")
         else:
-            tree = ET.parse("bsrate.xml")
+            tree = ET.parse("bsrate.xml")  # nosec B314 - Fallback only, defusedxml preferred
         root = tree.getroot()
 
         # Convert date to the format used in BSRate (DD.MM.YYYY)
@@ -295,7 +295,9 @@ def create_kdvp_xml(transactions, year, tax_number, taxpayer_type="FO"):
             row_id += 1
 
     # Pretty print XML
-    xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(indent="    ")
+    xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(
+        indent="    "
+    )  # nosec B318 - Parsing internally generated XML
 
     # Save XML file
     with open("Doh-KDVP.xml", "w", encoding="utf-8") as f:
@@ -412,7 +414,9 @@ def create_div_xml(transactions, company_info, year, tax_number, taxpayer_type="
         ET.SubElement(div_item, "ReliefStatement").text = ""
 
     # Pretty print XML
-    xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(indent="    ")
+    xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(
+        indent="    "
+    )  # nosec B318 - Parsing internally generated XML
 
     # Save XML file
     with open("Doh-Div.xml", "w", encoding="utf-8") as f:
@@ -506,7 +510,9 @@ def create_ifi_xml(transactions, year, tax_number, taxpayer_type="FO"):
             ET.SubElement(item, "Type").text = "B" if "BUY" in tx["Type"] else "S"
 
     # Pretty print XML
-    xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(indent="    ")
+    xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(
+        indent="    "
+    )  # nosec B318 - Parsing internally generated XML
 
     # Save XML file
     with open("D-IFI.xml", "w", encoding="utf-8") as f:
