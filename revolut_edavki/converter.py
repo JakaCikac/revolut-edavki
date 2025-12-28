@@ -2,14 +2,17 @@
 
 import pandas as pd
 from datetime import datetime
-try:
-    import defusedxml.ElementTree as ET
-except ImportError:
-    # Fallback to standard library if defusedxml not available
-    import xml.etree.ElementTree as ET
-    import warnings
-    warnings.warn("defusedxml not available, using standard xml library. Install defusedxml for XXE protection.")
+import xml.etree.ElementTree as ET
 from xml.dom import minidom
+
+# Import defusedxml for safe parsing only
+try:
+    import defusedxml.ElementTree as DefusedET
+    DEFUSEDXML_AVAILABLE = True
+except ImportError:
+    DEFUSEDXML_AVAILABLE = False
+    import warnings
+    warnings.warn("defusedxml not available, using standard xml library for parsing. Install defusedxml for XXE protection.")
 
 def get_exchange_rate(date, currency):
     """Get exchange rate from BSRate XML for any currency to EUR.
@@ -23,8 +26,11 @@ def get_exchange_rate(date, currency):
         return 1.0
         
     try:
-        # Parse the BSRate XML file
-        tree = ET.parse('bsrate.xml')
+        # Parse the BSRate XML file safely
+        if DEFUSEDXML_AVAILABLE:
+            tree = DefusedET.parse('bsrate.xml')
+        else:
+            tree = ET.parse('bsrate.xml')
         root = tree.getroot()
         
         # Convert date to the format used in BSRate (DD.MM.YYYY)
