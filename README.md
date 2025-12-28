@@ -4,7 +4,7 @@ A web application that generates tax report XML files for the Slovenian Financia
 
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/flask-3.1.0-green.svg)](https://flask.palletsprojects.com/)
-[![Poetry](https://img.shields.io/badge/poetry-1.7.0-blue.svg)](https://python-poetry.org/)
+[![Poetry](https://img.shields.io/badge/poetry-2.1.3-blue.svg)](https://python-poetry.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 This application helps Slovenian taxpayers generate XML files for their tax reports from trading and dividend data. It supports:
@@ -18,7 +18,7 @@ The application provides a user-friendly web interface for uploading transaction
 
 **IMPORTANT: READ BEFORE USING**
 
-This software is provided **"AS IS"**, without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. 
+This software is provided **"AS IS"**, without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement.
 
 **The authors and contributors:**
 - ❌ Make NO guarantees about the accuracy of generated tax reports
@@ -67,30 +67,38 @@ By using this software, you acknowledge that you have read this disclaimer and a
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-  - [Docker Compose (easiest)](#installation-with-docker-compose-easiest)
-  - [Poetry (recommended)](#installation-with-poetry-recommended)
-  - [Manual Installation](#manual-installation-alternative)
+  - [Docker Compose (Recommended)](#-docker-compose-recommended)
+  - [Poetry (Local Development)](#-poetry-local-development)
+  - [Manual Installation (Alternative)](#-manual-installation-alternative)
 - [Usage](#using-the-application)
+- [Make Commands](#make-commands)
 - [Security](#security)
 - [Contributing](#contributing)
 - [License](#license)
 
 ## Prerequisites
 
+### Recommended (Docker)
+- Docker and Docker Compose
+
+### Alternative (Local Development)
 - Python 3.12+
-- pip (Python package installer)
-
-OR
-
-- Docker and Docker Compose (for containerized deployment)
+- Poetry 2.1.3+ or pip
 
 ## Installation
 
-### Installation with Docker Compose (easiest)
+### 🐳 Docker Compose (Recommended)
+
+**Docker Compose is the preferred method for running this application.** It provides:
+- ✅ Consistent environment across all systems
+- ✅ No Python/Poetry installation required
+- ✅ Automatic dependency management
+- ✅ Production-ready configuration with Gunicorn
+- ✅ Easy switching between development and production modes
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/openhands/revolut-edavki.git
+   git clone https://github.com/JakaCikac/revolut-edavki.git
    cd revolut-edavki
    ```
 
@@ -102,33 +110,58 @@ OR
    # UPLOAD_PATH=/path/to/secure/storage
    ```
 
-3. Build and start the application:
+3. **For Development** (Flask dev server with hot reload):
    ```bash
-   docker-compose up -d
+   # Build and start in development mode
+   docker-compose --profile dev up --build
+
+   # Or use the Makefile shortcut
+   make docker-dev
    ```
 
-4. Access the application at:
+4. **For Production** (Gunicorn with auto-scaling workers):
+   ```bash
+   # Build and start in production mode
+   docker-compose --profile production up --build
+
+   # Or use the Makefile shortcut
+   make docker-prod
+   ```
+
+5. Access the application at:
    ```
    http://localhost:59855
    ```
 
-5. View logs:
+6. View logs:
    ```bash
-   docker-compose logs -f
+   # Development
+   docker-compose --profile dev logs -f
+
+   # Production
+   docker-compose --profile production logs -f
    ```
 
-6. Stop the application:
+7. Stop the application:
    ```bash
-   docker-compose down
+   # Development
+   docker-compose --profile dev down
+
+   # Production
+   docker-compose --profile production down
    ```
 
 **Note:** The `uploads` directory is mounted as a volume, so your data persists between container restarts.
 
-### Installation with Poetry (recommended)
+**Profiles:**
+- `dev`: Flask development server with debug mode and hot reload
+- `production`: Gunicorn WSGI server with multiple workers, non-root user, and optimized for production
+
+### 📦 Poetry (Local Development)
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/openhands/revolut-edavki.git
+   git clone https://github.com/JakaCikac/revolut-edavki.git
    cd revolut-edavki
    ```
 
@@ -160,7 +193,7 @@ OR
    poetry run python server.py --port 55952 --host 0.0.0.0
    ```
 
-### Manual Installation (alternative)
+### 🔧 Manual Installation (Alternative)
 
 1. Create and activate a virtual environment:
    ```bash
@@ -291,6 +324,43 @@ AAPL   | Apple Inc  | One Apple Park Way, Cupertino...    | USA         | US0378
    http://localhost:51408
    ```
 
+## Make Commands
+
+The project includes a Makefile for common tasks:
+
+```bash
+# Show all available commands
+make help
+
+# Docker commands (recommended)
+make docker-dev      # Run with Docker in development mode
+make docker-prod     # Run with Docker in production mode
+
+# Development commands (for local Poetry setup)
+make install         # Install dependencies with Poetry
+make test           # Run tests with coverage
+make lint           # Run all linters (pylint, mypy, black, isort)
+make format         # Format code with black and isort
+make security       # Run security checks with bandit
+make pre-commit     # Install pre-commit hooks
+make clean          # Clean up generated files
+make all            # Run format, lint, security, and test
+```
+
+**Quick Start:**
+```bash
+# Development with Docker (recommended)
+make docker-dev
+
+# Production with Docker (recommended)
+make docker-prod
+
+# Local development with Poetry
+make install
+make test
+poetry run python server.py
+```
+
 ## Using the Application
 
 1. Select the reporting year (default is current year)
@@ -360,12 +430,12 @@ Example:
 
 ## Project Structure
 ```
-project_openhands/
+revolut_edavki/
 ├── app.py              # Web application
 ├── converter.py        # Core conversion logic
-├── templates/         
+├── templates/
 │   └── index.html     # Web interface
-├── tests/             
+├── tests/
 │   └── test_*.py      # Test files
 ├── requirements.txt    # Python dependencies
 └── pyproject.toml     # Poetry configuration
