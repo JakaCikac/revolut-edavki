@@ -4,15 +4,15 @@ import multiprocessing
 import os
 
 # Server socket
-bind = f"{os.getenv('HOST', '0.0.0.0')}:{os.getenv('PORT', '59855')}"
+bind = f"0.0.0.0:{os.getenv('PORT', '59855')}"
 backlog = 2048
 
 # Worker processes
-workers = int(os.getenv("GUNICORN_WORKERS", multiprocessing.cpu_count() * 2 + 1))
+workers = multiprocessing.cpu_count() * 2 + 1
 worker_class = "sync"
 worker_connections = 1000
-timeout = 120
-keepalive = 5
+timeout = 30
+keepalive = 2
 
 # Logging
 accesslog = "-"
@@ -32,5 +32,5 @@ group = None
 tmp_upload_dir = None
 
 # SSL (if needed)
-# keyfile = '/path/to/keyfile'
-# certfile = '/path/to/certfile'
+keyfile = None
+certfile = None
