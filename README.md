@@ -14,6 +14,30 @@ This application helps Slovenian taxpayers generate XML files for their tax repo
 
 The application provides a user-friendly web interface for uploading transaction data, previewing the reports, and downloading the generated XML files in the format required by FURS.
 
+## ⚠️ DISCLAIMER
+
+**IMPORTANT: READ BEFORE USING**
+
+This software is provided **"AS IS"**, without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. 
+
+**The authors and contributors:**
+- ❌ Make NO guarantees about the accuracy of generated tax reports
+- ❌ Are NOT responsible for any errors, omissions, or miscalculations
+- ❌ Are NOT liable for any financial, legal, or tax-related consequences
+- ❌ Do NOT provide tax, legal, or financial advice
+
+**Users are solely responsible for:**
+- ✅ Verifying the accuracy of all generated reports
+- ✅ Ensuring compliance with Slovenian tax laws
+- ✅ Consulting with qualified tax professionals
+- ✅ Reviewing all data before submission to FURS
+
+**This tool is provided for convenience only.** Always verify generated XML files against your source data and consult with a tax professional before submitting to authorities.
+
+By using this software, you acknowledge that you have read this disclaimer and agree to use the software at your own risk.
+
+---
+
 ## Features
 
 - Generates three types of tax reports:
@@ -37,9 +61,23 @@ The application provides a user-friendly web interface for uploading transaction
   - Detailed logging with obscured sensitive data
   - Transaction preview before generation
 
+## Table of Contents
+
+- [Disclaimer](#️-disclaimer)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+  - [Docker Compose (easiest)](#installation-with-docker-compose-easiest)
+  - [Poetry (recommended)](#installation-with-poetry-recommended)
+  - [Manual Installation](#manual-installation-alternative)
+- [Usage](#using-the-application)
+- [Security](#security)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Prerequisites
 
-- Python 3.x
+- Python 3.12+
 - pip (Python package installer)
 
 OR
@@ -397,3 +435,66 @@ graph TD
     N --> O
     O --> P[Download Files]
 ```
+
+## Security
+
+Security is a priority for this project. We implement several security measures:
+
+- **Data Privacy:** Tax numbers are hashed using SHA-256 with salt
+- **File Security:** Uploaded files are hashed and stored securely
+- **No Persistent Storage:** User data is not stored permanently
+- **Input Validation:** All inputs are validated and sanitized
+- **Environment Configuration:** Secrets managed via environment variables
+
+For security concerns or to report vulnerabilities, please see [SECURITY.md](SECURITY.md).
+
+### Security Best Practices
+
+1. **Change the default salt:** Set a strong, random `TAX_SALT` in your `.env` file
+2. **Use HTTPS:** If exposing to network, use a reverse proxy with TLS
+3. **Keep updated:** Regularly update dependencies and the application
+4. **Review outputs:** Always verify generated XML files before submission
+5. **Secure environment:** Protect your `.env` file (chmod 600)
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Quick Start for Contributors
+
+```bash
+# Fork and clone the repository
+git clone https://github.com/YOUR_USERNAME/revolut-edavki.git
+cd revolut-edavki
+
+# Install dependencies
+poetry install
+
+# Run tests
+poetry run pytest
+
+# Make your changes and submit a PR
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+**Summary:** You are free to use, modify, and distribute this software with attribution. The software is provided "AS IS" without warranty.
+
+## Support
+
+- **Documentation:** See this README and linked documents
+- **Issues:** Report bugs via [GitHub Issues](https://github.com/JakaCikac/revolut-edavki/issues)
+- **Discussions:** Ask questions in [GitHub Discussions](https://github.com/JakaCikac/revolut-edavki/discussions)
+- **Security:** Report vulnerabilities via [SECURITY.md](SECURITY.md)
+
+## Acknowledgments
+
+- Slovenian Financial Administration (FURS) for XML schema specifications
+- Bank of Slovenia (BSI) for exchange rate data
+- All contributors who help improve this project
+
+---
+
+**Made with ❤️ for Slovenian traders and investors**
