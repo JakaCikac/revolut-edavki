@@ -147,15 +147,8 @@ def clean_amount(amount, fx_rate=1.0, return_details=False):
         print(f"Warning: Invalid amount '{amount}', using 0.0")
         return (0.0, 0.0, fx_rate) if return_details else 0.0
 
-    # Validate FX rate
-    try:
-        fx_rate = float(fx_rate)
-        if fx_rate <= 0:
-            print(f"Warning: Invalid FX rate {fx_rate}, using 1.0")
-            fx_rate = 1.0
-    except (ValueError, TypeError):
-        print(f"Warning: Invalid FX rate '{fx_rate}', using 1.0")
-        fx_rate = 1.0
+    # Validate and clean FX rate
+    fx_rate = clean_fx_rate(fx_rate)
 
     # Convert to EUR using provided FX rate
     # For non-EUR currencies, we need to divide by the FX rate
