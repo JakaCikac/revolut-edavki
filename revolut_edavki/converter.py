@@ -55,6 +55,35 @@ def get_exchange_rate(date, currency):
         return None
 
 
+def clean_fx_rate(fx_rate):
+    """Clean FX rate value that might have currency codes.
+    Args:
+        fx_rate: str/float/int FX rate value
+    Returns:
+        float: cleaned FX rate, defaults to 1.0 if invalid
+    """
+    if pd.isna(fx_rate):
+        return 1.0
+    
+    try:
+        if isinstance(fx_rate, (int, float)):
+            rate = float(fx_rate)
+        else:
+            # Remove currency codes and symbols
+            rate_str = str(fx_rate).strip()
+            for currency_code in ['USD', 'EUR', 'GBP', 'CHF', 'JPY', 'CAD', 'AUD', 'NZD', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'HRK', 'RSD', 'TRY', 'RUB', 'CNY', 'INR', 'BRL', 'ZAR', 'MXN', 'SGD', 'HKD', 'KRW', 'THB', 'MYR', 'IDR', 'PHP', 'VND']:
+                rate_str = rate_str.replace(currency_code, '')
+            rate = float(rate_str.replace("$", "").replace("€", "").replace("£", "").replace(",", "").strip())
+        
+        if rate <= 0:
+            print(f"Warning: Invalid FX rate {fx_rate}, using 1.0")
+            return 1.0
+        return rate
+    except (ValueError, TypeError):
+        print(f"Warning: Invalid FX rate '{fx_rate}', using 1.0")
+        return 1.0
+
+
 def clean_amount(amount, fx_rate=1.0, return_details=False):
     """Clean and convert amount to EUR using provided FX rate.
     Args:
@@ -279,7 +308,7 @@ def create_kdvp_xml(transactions, year, tax_number, taxpayer_type="FO"):
 
             # Get currency and convert amounts
             currency = tx["Currency"]
-            fx_rate = float(tx["FX Rate"]) if currency != "EUR" else 1.0
+            fx_rate = clean_fx_rate(tx["FX Rate"]) if currency != "EUR" else 1.0
 
             # Convert amount
             orig_price, eur_price, rate = clean_amount(tx["Price per share"], fx_rate=fx_rate, return_details=True)
@@ -417,7 +446,7 @@ def create_div_xml(transactions, company_info, year, tax_number, taxpayer_type="
 
         # Get currency and FX rate
         currency = tx["Currency"]
-        fx_rate = float(tx["FX Rate"]) if currency != "EUR" else 1.0
+        fx_rate = clean_fx_rate(tx["FX Rate"]) if currency != "EUR" else 1.0
 
         # Convert amount
         orig_amount, eur_amount, rate = clean_amount(tx["Total Amount"], fx_rate=fx_rate, return_details=True)
@@ -521,7 +550,7 @@ def create_ifi_xml(transactions, year, tax_number, taxpayer_type="FO"):
         if "BUY" in tx["Type"] or "SELL" in tx["Type"]:
             # Get currency and FX rate
             currency = tx["Currency"]
-            fx_rate = float(tx["FX Rate"]) if currency != "EUR" else 1.0
+            fx_rate = clean_fx_rate(tx["FX Rate"]) if currency != "EUR" else 1.0
 
             # Convert amount
             orig_amount, eur_amount, rate = clean_amount(tx["Total Amount"], fx_rate=fx_rate, return_details=True)

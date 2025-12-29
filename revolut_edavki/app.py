@@ -123,7 +123,7 @@ def process_files(transactions_file, company_info_file, year, tax_number, taxpay
                 company = company_matches.iloc[0]
                 # Use clean_amount to properly parse currency values
                 currency = tx["Currency"]
-                fx_rate = float(tx["FX Rate"]) if currency != "EUR" else 1.0
+                fx_rate = converter.clean_fx_rate(tx["FX Rate"]) if currency != "EUR" else 1.0
                 amount = abs(converter.clean_amount(tx["Total Amount"], fx_rate=fx_rate))
                 preview["dividends"].append(
                     {
@@ -144,7 +144,7 @@ def process_files(transactions_file, company_info_file, year, tax_number, taxpay
             if "BUY" in tx["Type"] or "SELL" in tx["Type"]:
                 # Use clean_amount to properly parse currency values
                 currency = tx["Currency"]
-                fx_rate = float(tx["FX Rate"]) if currency != "EUR" else 1.0
+                fx_rate = converter.clean_fx_rate(tx["FX Rate"]) if currency != "EUR" else 1.0
                 amount = abs(converter.clean_amount(tx["Total Amount"], fx_rate=fx_rate))
                 preview["ifi"].append(
                     {

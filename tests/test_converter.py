@@ -3,7 +3,7 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from revolut_edavki.converter import clean_amount, create_div_xml, create_ifi_xml, create_kdvp_xml
+from revolut_edavki.converter import clean_amount, clean_fx_rate, create_div_xml, create_ifi_xml, create_kdvp_xml
 
 
 # Test data
@@ -113,6 +113,35 @@ def test_clean_amount_nan():
     assert orig == 0
     assert eur == 0
     assert rate == 1.0700
+
+
+def test_clean_amount_with_currency_prefix():
+    """Test amount cleaning with currency code prefix like 'USD 2.69'"""
+    orig, eur, rate = clean_amount("USD 2.69", fx_rate=1.0700, return_details=True)
+    assert orig == 2.69
+    assert pytest.approx(eur, 0.01) == 2.51
+    assert rate == 1.0700
+
+
+def test_clean_fx_rate_numeric():
+    """Test clean_fx_rate with numeric value"""
+    assert clean_fx_rate(1.0700) == 1.0700
+    assert clean_fx_rate("1.0800") == 1.0800
+
+
+def test_clean_fx_rate_with_currency_prefix():
+    """Test clean_fx_rate with currency code prefix like 'USD 1.07'"""
+    assert clean_fx_rate("USD 1.0700") == 1.0700
+    assert clean_fx_rate("EUR 1.0000") == 1.0000
+    assert clean_fx_rate("GBP 0.8500") == 0.8500
+
+
+def test_clean_fx_rate_invalid():
+    """Test clean_fx_rate with invalid values"""
+    assert clean_fx_rate("invalid") == 1.0
+    assert clean_fx_rate(0) == 1.0
+    assert clean_fx_rate(-1.5) == 1.0
+    assert clean_fx_rate(None) == 1.0
 
 
 # Test KDVP processing
