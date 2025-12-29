@@ -107,6 +107,10 @@ def process_files(transactions_file, company_info_file, year, tax_number, taxpay
 
         transactions["Date"] = pd.to_datetime(transactions["Date"], format="mixed")
         print("Dates parsed successfully")
+        
+        # Convert Quantity to float (it's safe as it doesn't have currency prefixes)
+        transactions["Quantity"] = pd.to_numeric(transactions["Quantity"], errors="coerce")
+        print("Quantity column converted to numeric")
 
         company_info = pd.read_excel(company_info_path)
         print(f"Loaded company info: {len(company_info)} rows")
