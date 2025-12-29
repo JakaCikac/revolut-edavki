@@ -101,8 +101,8 @@ def process_files(transactions_file, company_info_file, year, tax_number, taxpay
         transactions_file.save(transactions_path)
         company_info_file.save(company_info_path)
 
-        # Load data
-        transactions = pd.read_csv(transactions_path)
+        # Load data - read as strings to avoid pandas auto-conversion errors
+        transactions = pd.read_csv(transactions_path, dtype=str)
         print(f"Loaded transactions: {len(transactions)} rows")
 
         transactions["Date"] = pd.to_datetime(transactions["Date"], format="mixed")
