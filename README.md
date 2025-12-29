@@ -1,6 +1,6 @@
-# Tax Report Generator
+# Revolut -> eDAVKI tax report converter
 
-A web application that generates tax report XML files for the Slovenian Financial Administration (FURS) from trading and dividend data.
+A web application that generates tax report XML files for the Slovenian Financial Administration (FURS) from Revolut trading and dividend data.
 
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/flask-3.1.0-green.svg)](https://flask.palletsprojects.com/)
@@ -132,6 +132,10 @@ By using this software, you acknowledge that you have read this disclaimer and a
    ```
    http://localhost:59855
    ```
+
+   The application should look like this:
+
+   ![Web Application Interface](images/web_app.png)
 
 6. View logs:
    ```bash
@@ -364,9 +368,10 @@ poetry run python server.py
 ## Using the Application
 
 1. Select the reporting year (default is current year)
-2. Upload your transactions.csv file
-3. Upload your Company_info.xlsx file
-4. Click "Upload and Process"
+2. Upload your transactions.csv file from Revolut
+3. Upload your Company_info.xlsx file (example: `Company_info_2024.xlsx`)
+4. Enter your tax number
+5. Click "🚀 Generate Reports"
 5. Review the preview tables for:
    - Stock transactions (KDVP)
    - Dividends
