@@ -415,6 +415,9 @@ poetry run python server.py
    - FX rates
    - EUR conversions
 
+For uploading the reports to FURS please refer to
+excellent instructions in https://github.com/masbug/etoro-edavki README.
+
 ## Currency Conversion
 
 The application uses the following formula for currency conversion:
