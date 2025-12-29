@@ -277,6 +277,22 @@ The application uses several security measures:
 
 ## Input Files
 
+### How to Get Account Statement from Revolut App
+
+To export your transaction data from Revolut:
+
+1. **Open the Revolut app** and go to the **Invest** tab
+2. Click **More** (three dots menu)
+3. Select **Documents**
+
+**⚠️ IMPORTANT:** Make sure to select **"All time"** as the period so that all buy and sell pairs are properly recorded!
+
+![Step 1: Go to Invest tab and click More](images/acc_statement_0.jpeg)
+
+![Step 2: Select Documents](images/acc_statement_1.jpeg)
+
+![Step 3: Select "All time" period](images/acc_statement_2.jpeg)
+
 ### transactions.csv
 Contains all trading and dividend transactions with the following columns:
 - `Date`: Transaction date (YYYY-MM-DD)
