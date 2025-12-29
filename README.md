@@ -5,7 +5,7 @@ A web application that generates tax report XML files for the Slovenian Financia
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/flask-3.1.0-green.svg)](https://flask.palletsprojects.com/)
 [![Poetry](https://img.shields.io/badge/poetry-2.1.3-blue.svg)](https://python-poetry.org/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-CC%20BY--NC--SA%204.0-blue.svg)](LICENSE)
 
 This application helps Slovenian taxpayers generate XML files for their tax reports from trading and dividend data. It supports:
 - Capital Gains (KDVP) reports for stock trading
@@ -548,9 +548,19 @@ poetry run pytest
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License** (CC BY-NC-SA 4.0) - see the [LICENSE](LICENSE) file for details.
 
-**Summary:** You are free to use, modify, and distribute this software with attribution. The software is provided "AS IS" without warranty.
+**Summary:**
+- ✅ **Free to use** for non-commercial purposes
+- ✅ **Free to modify** and create derivative works
+- ✅ **Free to share** with others
+- ⚠️ **Attribution required** - You must credit JakaCikac as the original author
+- ❌ **No commercial use** - Cannot be used for commercial purposes without permission
+- 🔄 **Share-Alike** - Derivative works must use the same license
+
+The software is provided "AS IS" without warranty of any kind.
+
+Full license: https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 ## Support
 
@@ -564,6 +574,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Slovenian Financial Administration (FURS) for XML schema specifications
 - Bank of Slovenia (BSI) for exchange rate data
 - All contributors who help improve this project
+- IB -> eDavki konverter: https://github.com/jamsix/ib-edavki (Copyright (c) 2020 Primož Sečnik Kolman; MIT License)
+- Etoro -> eDavki konverter: https://github.com/masbug/etoro-edavki (Copyright (c) 2021 Masbug; MIT License)
 
 ---
 
