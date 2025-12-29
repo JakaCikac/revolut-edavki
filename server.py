@@ -12,7 +12,7 @@ from flask import Flask, jsonify, render_template, request, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
-from revolut_edavki.converter import clean_amount, create_div_xml, create_ifi_xml, create_kdvp_xml
+from revolut_edavki.converter import clean_amount, clean_fx_rate, create_div_xml, create_ifi_xml, create_kdvp_xml
 
 # Load environment variables
 load_dotenv()
@@ -166,7 +166,10 @@ def process_files(transactions_file, company_info_file, year, tax_number, taxpay
             company_matches = company_info[company_info["Symbol"] == tx["Ticker"]]
             if len(company_matches) > 0:
                 company = company_matches.iloc[0]
-                amount = abs(float(str(tx["Total Amount"]).replace("$", "").replace("€", "").replace(",", "")))
+                # Use clean_amount to properly parse currency values
+                currency = tx["Currency"]
+                fx_rate = clean_fx_rate(tx["FX Rate"]) if currency != "EUR" else 1.0
+                amount = abs(clean_amount(tx["Total Amount"], fx_rate=fx_rate))
                 preview["dividends"].append(
                     {
                         "date": tx["Date"].strftime("%Y-%m-%d"),
@@ -184,7 +187,10 @@ def process_files(transactions_file, company_info_file, year, tax_number, taxpay
 
         for _, tx in ifi_tx.iterrows():
             if "BUY" in tx["Type"] or "SELL" in tx["Type"]:
-                amount = abs(float(str(tx["Total Amount"]).replace("€", "").replace(",", "")))
+                # Use clean_amount to properly parse currency values
+                currency = tx["Currency"]
+                fx_rate = clean_fx_rate(tx["FX Rate"]) if currency != "EUR" else 1.0
+                amount = abs(clean_amount(tx["Total Amount"], fx_rate=fx_rate))
                 preview["ifi"].append(
                     {
                         "date": tx["Date"].strftime("%Y-%m-%d"),
@@ -266,7 +272,7 @@ def upload():
         return jsonify(preview)
 
     except ValueError as e:
-        logger.error(f"Validation error: {e}")
+        logger.error(f"Validation error: {e}", exc_info=True)
         return jsonify({"error": str(e)}), 400
     except Exception as e:
         logger.error(f"Upload processing error: {e}", exc_info=True)
