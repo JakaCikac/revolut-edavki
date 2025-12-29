@@ -73,8 +73,47 @@ def clean_amount(amount, fx_rate=1.0, return_details=False):
         if isinstance(amount, (int, float)):
             value = float(amount)
         else:
+            # Remove currency codes (USD, EUR, GBP, etc.), symbols, and commas
+            amount_str = str(amount).strip()
+            # Remove common currency codes
+            for currency_code in [
+                "USD",
+                "EUR",
+                "GBP",
+                "CHF",
+                "JPY",
+                "CAD",
+                "AUD",
+                "NZD",
+                "SEK",
+                "NOK",
+                "DKK",
+                "PLN",
+                "CZK",
+                "HUF",
+                "RON",
+                "BGN",
+                "HRK",
+                "RSD",
+                "TRY",
+                "RUB",
+                "CNY",
+                "INR",
+                "BRL",
+                "ZAR",
+                "MXN",
+                "SGD",
+                "HKD",
+                "KRW",
+                "THB",
+                "MYR",
+                "IDR",
+                "PHP",
+                "VND",
+            ]:
+                amount_str = amount_str.replace(currency_code, "")
             # Remove currency symbols and commas
-            value = float(str(amount).replace("$", "").replace("€", "").replace("£", "").replace(",", ""))
+            value = float(amount_str.replace("$", "").replace("€", "").replace("£", "").replace(",", "").strip())
     except (ValueError, TypeError):
         print(f"Warning: Invalid amount '{amount}', using 0.0")
         return (0.0, 0.0, fx_rate) if return_details else 0.0
