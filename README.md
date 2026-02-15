@@ -590,6 +590,14 @@ The software is provided "AS IS" without warranty of any kind.
 - **Discussions:** Ask questions in [GitHub Discussions](https://github.com/JakaCikac/revolut-edavki/discussions)
 - **Security:** Report vulnerabilities via [SECURITY.md](SECURITY.md)
 
+## Changelog
+
+### 2026-02-15
+- **Updated Doh-Div XML schema** to comply with FURS Doh_Div_3.xsd specification
+  - `<Dividend>` elements are now direct children of `<body>` instead of nested inside `<Doh_Div>`
+  - `<Doh_Div>` element now serves as metadata container with Period field
+  - Updated both example XML file and code generator
+
 ## Acknowledgments
 
 - Slovenian Financial Administration (FURS) for XML schema specifications

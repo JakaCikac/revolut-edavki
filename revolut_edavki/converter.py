@@ -64,17 +64,51 @@ def clean_fx_rate(fx_rate):
     """
     if pd.isna(fx_rate):
         return 1.0
-    
+
     try:
         if isinstance(fx_rate, (int, float)):
             rate = float(fx_rate)
         else:
             # Remove currency codes and symbols
             rate_str = str(fx_rate).strip()
-            for currency_code in ['USD', 'EUR', 'GBP', 'CHF', 'JPY', 'CAD', 'AUD', 'NZD', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'HRK', 'RSD', 'TRY', 'RUB', 'CNY', 'INR', 'BRL', 'ZAR', 'MXN', 'SGD', 'HKD', 'KRW', 'THB', 'MYR', 'IDR', 'PHP', 'VND']:
-                rate_str = rate_str.replace(currency_code, '')
+            for currency_code in [
+                "USD",
+                "EUR",
+                "GBP",
+                "CHF",
+                "JPY",
+                "CAD",
+                "AUD",
+                "NZD",
+                "SEK",
+                "NOK",
+                "DKK",
+                "PLN",
+                "CZK",
+                "HUF",
+                "RON",
+                "BGN",
+                "HRK",
+                "RSD",
+                "TRY",
+                "RUB",
+                "CNY",
+                "INR",
+                "BRL",
+                "ZAR",
+                "MXN",
+                "SGD",
+                "HKD",
+                "KRW",
+                "THB",
+                "MYR",
+                "IDR",
+                "PHP",
+                "VND",
+            ]:
+                rate_str = rate_str.replace(currency_code, "")
             rate = float(rate_str.replace("$", "").replace("€", "").replace("£", "").replace(",", "").strip())
-        
+
         if rate <= 0:
             print(f"Warning: Invalid FX rate {fx_rate}, using 1.0")
             return 1.0
@@ -461,8 +495,8 @@ def create_div_xml(transactions, company_info, year, tax_number, taxpayer_type="
             }
         )
 
-        # Create dividend item
-        div_item = ET.SubElement(doh_div, "Dividend")
+        # Create dividend item as direct child of body (per new schema)
+        div_item = ET.SubElement(body, "Dividend")
         ET.SubElement(div_item, "Date").text = tx["Date"].strftime("%Y-%m-%d")
         ET.SubElement(div_item, "PayerIdentificationNumber").text = company.get("ISIN", "")
         ET.SubElement(div_item, "PayerName").text = company["Name"]

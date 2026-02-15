@@ -107,7 +107,7 @@ def process_files(transactions_file, company_info_file, year, tax_number, taxpay
 
         transactions["Date"] = pd.to_datetime(transactions["Date"], format="mixed")
         print("Dates parsed successfully")
-        
+
         # Convert Quantity to float (it's safe as it doesn't have currency prefixes)
         transactions["Quantity"] = pd.to_numeric(transactions["Quantity"], errors="coerce")
         print("Quantity column converted to numeric")
@@ -127,7 +127,7 @@ def process_files(transactions_file, company_info_file, year, tax_number, taxpay
         print(f"Filtered transactions for {year}: {len(transactions_year)} rows")
 
         # Generate preview data
-        preview = {"kdvp": [], "dividends": [], "ifi": []}
+        preview: dict[str, list] = {"kdvp": [], "dividends": [], "ifi": []}
 
         # KDVP preview - only stocks with sells in target year
         stock_tx = transactions_year[
